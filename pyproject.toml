@@ -24,17 +24,20 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+# Jetson dependencies - these should only be installed on the Jetson device
+# NOT on development machines (x86_64)
+# Install with: uv sync --extra jetson (on Jetson only)
 jetson = [
-    "pycuda>=2022.1",
-    "cuda-python>=12.6",
-    "cupy-cuda12x>=12.0",
+    "pycuda>=2022.1; platform_machine=='aarch64'",
+    "cuda-python>=12.6; platform_machine=='aarch64'",
+    "cupy-cuda12x>=12.0; platform_machine=='aarch64'",
     "numpy>=1.24.0",
     "opencv-python>=4.8.0",
     "opencv-contrib-python>=4.8.0",
-    "pygobject>=3.44.0",
+    "pygobject>=3.44.0; platform_machine=='aarch64'",
     "torch>=2.1.0",
     "torchvision>=0.16.0",
-    "tensorrt>=10.3",
+    "tensorrt>=10.3; platform_machine=='aarch64'",
     "onnx>=1.15.0",
     "onnxruntime-gpu>=1.16.0",
     "transformers>=4.35.0",
@@ -42,11 +45,10 @@ jetson = [
     "accelerate>=0.25.0",
     "safetensors>=0.4.0",
     "peft>=0.7.0",
-    "bitsandbytes>=0.41.0",
+    "bitsandbytes>=0.41.0; platform_machine=='aarch64'",
     "triton>=2.1.0",
     "xformers>=0.0.23",
-    "jetson-stats>=4.2",
-    "polygraphy>=0.50",
+    "jetson-stats>=4.2; platform_machine=='aarch64'",
 ]
 
 dev = [
