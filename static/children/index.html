@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StoryBot</title>
+    <link rel="stylesheet" href="/children/styles.css">
+</head>
+<body>
+    <!-- Idle screen - story grid -->
+    <div class="screen-idle" data-screen="idle">
+        <div class="story-grid"></div>
+    </div>
+
+    <!-- Playing screen - playback with cover image -->
+    <div class="screen-playing hidden" data-screen="playing">
+        <div class="particles"></div>
+        <div class="playback-container">
+            <img class="cover-image" src="" alt="" style="display: none;">
+            <div class="cover-emoji"></div>
+        </div>
+    </div>
+
+    <!-- Thank you screen -->
+    <div class="screen-thankyou hidden" data-screen="thankyou">
+        <div class="thankyou-content">
+            <div class="thankyou-emoji"></div>
+        </div>
+    </div>
+
+    <!-- Hidden audio element -->
+    <audio id="story-audio" preload="auto"></audio>
+
+    <script src="/children/script.js"></script>
+</body>
+</html>
