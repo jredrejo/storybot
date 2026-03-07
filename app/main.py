@@ -4,6 +4,7 @@ from contextlib import asynccontextmanager
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.responses import RedirectResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.config import ConfigManager
@@ -62,9 +63,9 @@ app = FastAPI(
 
 
 @app.get("/")
-async def root() -> dict:
-    """Root endpoint."""
-    return {"status": "ok", "service": "storybot"}
+async def root():
+    """Redirect root to children's kiosk interface."""
+    return RedirectResponse(url="/children/")
 
 
 # Include routers
@@ -76,3 +77,8 @@ app.include_router(stories_router)
 stories_static_dir = Path("content/stories")
 if stories_static_dir.exists():
     app.mount("/static/stories", StaticFiles(directory=str(stories_static_dir)), name="stories")
+
+# Mount children's kiosk interface
+children_static_dir = Path("static/children")
+if children_static_dir.exists():
+    app.mount("/children", StaticFiles(directory=str(children_static_dir), html=True), name="children")

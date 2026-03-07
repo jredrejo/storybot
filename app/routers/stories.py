@@ -8,13 +8,68 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from fastapi.requests import Request
 
 from app.dependencies import get_story_manager
-from app.models.story import Story, StoryCreate, StoryList
+from app.models.story import NFCAssignRequest, Story, StoryCreate, StoryList
 from app.services.story_manager import StoryManager
 
 router = APIRouter()
 
 # Valid audio content types
 VALID_AUDIO_TYPES = {"audio/mpeg", "audio/wav", "audio/x-wav"}
+
+
+# NFC lookup endpoint MUST be defined before /{story_id} to avoid path conflicts
+@router.get("/api/stories/nfc/{nfc_uid}", response_model=Story)
+async def get_story_by_nfc(
+    nfc_uid: str,
+    story_manager: StoryManager = Depends(get_story_manager),
+) -> Story:
+    """Get a story by NFC card UID.
+
+    Args:
+        nfc_uid: NFC card UID
+        story_manager: StoryManager instance
+
+    Returns:
+        Story object
+
+    Raises:
+        HTTPException: If no story mapped to this NFC card
+    """
+    story = story_manager.get_story_by_nfc(nfc_uid)
+    if not story:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="No story mapped to this NFC card",
+        )
+    return story
+
+
+@router.post("/api/stories/{story_id}/nfc", response_model=Story)
+async def assign_nfc_to_story(
+    story_id: str,
+    request: NFCAssignRequest,
+    story_manager: StoryManager = Depends(get_story_manager),
+) -> Story:
+    """Assign an NFC card UID to a story.
+
+    Args:
+        story_id: Story ID
+        request: NFC assignment request with nfc_uid
+        story_manager: StoryManager instance
+
+    Returns:
+        Updated Story object
+
+    Raises:
+        HTTPException: If story not found
+    """
+    story = story_manager.assign_nfc(story_id, request.nfc_uid)
+    if not story:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail=f"Story '{story_id}' not found",
+        )
+    return story
 
 
 @router.post("/api/stories", response_model=Story, status_code=status.HTTP_201_CREATED)

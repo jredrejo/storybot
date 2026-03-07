@@ -143,7 +143,7 @@ class StoryManager:
 
             return True
 
-    def assign_nfc(self, story_id: str, nfc_uid: str) -> bool:
+    def assign_nfc(self, story_id: str, nfc_uid: str) -> Story | None:
         """Assign an NFC card UID to a story.
 
         Args:
@@ -151,13 +151,13 @@ class StoryManager:
             nfc_uid: NFC card UID
 
         Returns:
-            True if assigned, False if story not found
+            Updated Story if assigned, None if story not found
         """
         with self._lock:
             index = self._load_index()
 
             if story_id not in index["stories"]:
-                return False
+                return None
 
             # Remove old NFC mapping if exists
             old_nfc_uid = index["stories"][story_id].get("nfc_uid")
@@ -169,7 +169,7 @@ class StoryManager:
             index["nfc_to_story"][nfc_uid] = story_id
 
             self._save_index(index)
-            return True
+            return Story(**index["stories"][story_id])
 
     def get_story_by_nfc(self, nfc_uid: str) -> Story | None:
         """Get a story by NFC card UID.

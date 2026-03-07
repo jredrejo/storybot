@@ -32,3 +32,9 @@ class StoryList(BaseModel):
 
     stories: list[Story] = Field(..., description="List of stories")
     total: int = Field(..., description="Total number of stories")
+
+
+class NFCAssignRequest(BaseModel):
+    """NFC card assignment request."""
+
+    nfc_uid: str = Field(..., min_length=1, description="NFC card UID to assign")
