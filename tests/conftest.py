@@ -1,7 +1,13 @@
 """Pytest configuration and fixtures."""
+import os
 import pytest
 from pathlib import Path
 import tempfile
+
+
+# Set testing environment variable before app imports
+# This prevents the app lifespan from creating real content/stories directories
+os.environ["TESTING"] = "1"
 
 
 @pytest.fixture

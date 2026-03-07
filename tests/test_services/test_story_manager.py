@@ -172,8 +172,12 @@ class TestStoryManagerNFC:
         # Assign NFC
         result = story_manager.assign_nfc("test-story-1", "04:A3:B5:C7:D9")
 
-        # Verify
-        assert result is True
+        # Verify returns Story object
+        assert isinstance(result, Story)
+        assert result.id == "test-story-1"
+        assert result.nfc_uid == "04:A3:B5:C7:D9"
+
+        # Verify story was updated
         story = story_manager.get_story("test-story-1")
         assert story.nfc_uid == "04:A3:B5:C7:D9"
 
@@ -184,9 +188,9 @@ class TestStoryManagerNFC:
     def test_assign_nfc_non_existent_story_returns_false(
         self, story_manager: StoryManager
     ):
-        """Test that assign_nfc returns False for non-existent story."""
+        """Test that assign_nfc returns None for non-existent story."""
         result = story_manager.assign_nfc("non-existent", "04:A3:B5:C7:D9")
-        assert result is False
+        assert result is None
 
     def test_get_story_by_nfc_returns_story(
         self, story_manager: StoryManager, story_create_data: dict

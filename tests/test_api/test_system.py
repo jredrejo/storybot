@@ -8,20 +8,19 @@ from app.main import app
 
 @pytest.fixture
 def client():
-    """Create test client."""
-    return TestClient(app)
+    """Create test client with lifespan context."""
+    with TestClient(app) as c:
+        yield c
 
 
 class TestSystemEndpoints:
     """Test system endpoint functionality."""
 
     def test_root_returns_ok(self, client):
-        """GET / returns status ok."""
-        response = client.get("/")
-        assert response.status_code == 200
-        data = response.json()
-        assert data["status"] == "ok"
-        assert data["service"] == "storybot"
+        """GET / redirects to children's kiosk interface."""
+        response = client.get("/", follow_redirects=False)
+        assert response.status_code == 307  # Temporary redirect
+        assert response.headers["location"] == "/children/"
 
     def test_system_status_returns_hardware_state(self, client):
         """GET /api/system/status returns SystemStatus."""

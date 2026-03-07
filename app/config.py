@@ -65,7 +65,7 @@ class ConfigManager:
             settings: Settings to save
         """
         self.config_path.parent.mkdir(parents=True, exist_ok=True)
-        self.config_path.write_text(settings.json(indent=2))
+        self.config_path.write_text(settings.model_dump_json(indent=2))
         self._settings = settings
 
     def reload(self) -> Settings:

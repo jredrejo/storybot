@@ -1,7 +1,6 @@
 """Tests for Story API endpoints."""
 
 import json
-import shutil
 from io import BytesIO
 from pathlib import Path
 
@@ -9,34 +8,76 @@ import pytest
 from fastapi.testclient import TestClient
 
 from app.main import app
+from app.services.story_manager import StoryManager
 
 
 @pytest.fixture
-def client():
-    """Create test client with lifespan context."""
-    # Clean up any existing stories before tests
-    stories_dir = Path("content/stories")
-    if stories_dir.exists():
-        # Remove all story directories
-        for item in stories_dir.iterdir():
-            if item.is_dir() and item.name.startswith(("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")):
-                shutil.rmtree(item)
-        # Reset index
-        index_file = stories_dir / "stories.json"
-        if index_file.exists():
-            index_file.write_text(json.dumps({"version": 1, "stories": {}, "nfc_to_story": {}}))
+def temp_story_manager(tmp_path):
+    """Create a StoryManager with temporary directory."""
+    stories_dir = tmp_path / "content" / "stories"
+    stories_dir.mkdir(parents=True)
 
-    with TestClient(app) as c:
-        yield c
+    # Create empty stories index
+    index_file = stories_dir / "stories.json"
+    index_file.write_text(json.dumps({"version": 1, "stories": {}, "nfc_to_story": {}}))
 
-    # Clean up after tests
-    if stories_dir.exists():
-        for item in stories_dir.iterdir():
-            if item.is_dir() and item.name.startswith(("0", "1", "2", "3", "4", "5", "6", "7", "8", "9")):
-                shutil.rmtree(item)
-        index_file = stories_dir / "stories.json"
-        if index_file.exists():
-            index_file.write_text(json.dumps({"version": 1, "stories": {}, "nfc_to_story": {}}))
+    # Create StoryManager with temp directory
+    manager = StoryManager()
+    manager.CONTENT_DIR = stories_dir
+    manager.INDEX_FILE = index_file
+
+    return manager, stories_dir
+
+
+@pytest.fixture
+def client(temp_story_manager, monkeypatch):
+    """Create test client with temporary stories directory."""
+    story_manager, stories_dir = temp_story_manager
+
+    # Patch StoryManager class attributes before app loads
+    monkeypatch.setattr(StoryManager, "CONTENT_DIR", stories_dir)
+    monkeypatch.setattr(StoryManager, "INDEX_FILE", stories_dir / "stories.json")
+
+    # Override the app dependency to use our temp story manager
+    app.dependency_overrides = {}
+    from app.dependencies import get_story_manager
+
+    async def override_get_story_manager():
+        return story_manager
+
+    app.dependency_overrides[get_story_manager] = override_get_story_manager
+
+    # Also need to patch the hardcoded Path("content/stories") in the router
+    # We'll do this by replacing the Path function temporarily in the stories router module
+    import app.routers.stories as stories_router_module
+    original_path = stories_router_module.Path
+
+    def mock_path(path_str):
+        if path_str == "content/stories":
+            return stories_dir
+        return original_path(path_str)
+
+    stories_router_module.Path = mock_path
+
+    # Also patch Path in main.py for the lifespan and static file mounting
+    import app.main as main_module
+    original_main_path = main_module.Path
+
+    def mock_main_path(path_str):
+        if path_str == "content/stories":
+            return stories_dir
+        return original_main_path(path_str)
+
+    main_module.Path = mock_main_path
+
+    try:
+        with TestClient(app) as c:
+            yield c
+    finally:
+        # Clean up
+        app.dependency_overrides = {}
+        stories_router_module.Path = original_path
+        main_module.Path = original_main_path
 
 
 class TestPostStories:

@@ -22,6 +22,8 @@ async def lifespan(app: FastAPI):
     Initialize hardware manager, config, and story manager on startup.
     Shutdown services on shutdown.
     """
+    import os
+
     # Startup
     hardware = HardwareManager()
     config = ConfigManager()
@@ -38,15 +40,16 @@ async def lifespan(app: FastAPI):
     # Initialize hardware detection (stub for now)
     await hardware.detect_hardware()
 
-    # Ensure content directory exists
-    content_dir = Path("content/stories")
-    content_dir.mkdir(parents=True, exist_ok=True)
+    # Ensure content directory exists (skip during testing)
+    if not os.environ.get("TESTING"):
+        content_dir = Path("content/stories")
+        content_dir.mkdir(parents=True, exist_ok=True)
 
-    # Ensure stories index exists
-    index_file = content_dir / "stories.json"
-    if not index_file.exists():
-        import json
-        index_file.write_text(json.dumps({"version": 1, "stories": {}, "nfc_to_story": {}}))
+        # Ensure stories index exists
+        index_file = content_dir / "stories.json"
+        if not index_file.exists():
+            import json
+            index_file.write_text(json.dumps({"version": 1, "stories": {}, "nfc_to_story": {}}))
 
     yield
 
