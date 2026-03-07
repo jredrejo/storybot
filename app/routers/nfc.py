@@ -1,4 +1,26 @@
-"""NFC router with SSE endpoints for card tap events."""
+"""NFC router with SSE endpoints for card tap events.
+
+NFC Integration Flow:
+---------------------
+
+Admin Panel (Teacher):
+    1. EventSource('/api/nfc/read') connects to SSE stream
+    2. On 'card' event with UID, display prompt to assign card
+    3. POST /api/stories/{id}/nfc with {"nfc_uid": "..."} to assign
+    4. Story is now linked to the physical NFC card
+
+Kiosk (Child):
+    1. EventSource('/api/nfc/read') connects to SSE stream
+    2. On 'card' event with UID, GET /api/stories/nfc/{uid}
+    3. If story found, trigger playback with LED feedback
+    4. Child hears their personalized story
+
+Thread Safety:
+    - NFC polling runs in daemon thread (from Phase 0)
+    - Server remains responsive during polling
+    - SSE disconnection stops polling for that client
+    - StoryManager uses threading.Lock for NFC mapping updates
+"""
 
 import asyncio
 import json
