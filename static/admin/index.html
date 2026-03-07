@@ -1,0 +1,89 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>StoryBot Admin</title>
+    <link rel="stylesheet" href="/admin/styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>StoryBot Admin</h1>
+        </header>
+
+        <section class="upload-section">
+            <h2>Upload New Story</h2>
+            <form id="upload-form" enctype="multipart/form-data">
+                <div class="form-group">
+                    <label for="title">Title *</label>
+                    <input
+                        type="text"
+                        id="title"
+                        name="title"
+                        required
+                        maxlength="100"
+                        placeholder="e.g., The Three Little Pigs"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="emoji">Emoji *</label>
+                    <input
+                        type="text"
+                        id="emoji"
+                        name="emoji"
+                        required
+                        maxlength="10"
+                        placeholder="e.g., 🐷 🐖 🐽"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="led_color">LED Color *</label>
+                    <input
+                        type="color"
+                        id="led_color"
+                        name="led_color"
+                        value="#00FF00"
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="audio">Audio File *</label>
+                    <input
+                        type="file"
+                        id="audio"
+                        name="audio"
+                        accept="audio/mpeg,audio/wav"
+                        required
+                    >
+                </div>
+
+                <div class="form-group">
+                    <label for="cover">Cover Image (optional)</label>
+                    <input
+                        type="file"
+                        id="cover"
+                        name="cover"
+                        accept="image/*"
+                    >
+                </div>
+
+                <button type="submit" class="btn btn-primary">Upload Story</button>
+            </form>
+        </section>
+
+        <section class="stories-section">
+            <h2>Story Library</h2>
+            <div id="story-list" class="story-list">
+                <p class="loading">Loading stories...</p>
+            </div>
+        </section>
+
+        <div id="status-message" class="status-message hidden"></div>
+    </div>
+
+    <script src="/admin/script.js"></script>
+</body>
+</html>
