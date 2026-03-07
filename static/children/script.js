@@ -9,6 +9,7 @@ let currentState = STATES.IDLE;
 let stories = [];
 let currentStory = null;
 let nfcEventSource = null;
+let ledPulseInterval = null;
 const audioElement = document.getElementById('story-audio');
 
 function transitionTo(newState, story = null) {
@@ -20,14 +21,18 @@ function transitionTo(newState, story = null) {
 
     switch (newState) {
         case STATES.IDLE:
+            stopLEDPulse();
+            turnOffLED();
             document.querySelector('[data-screen="idle"]').classList.remove('hidden');
             break;
         case STATES.PLAYING:
+            startLEDPulse(story.led_color);
             showPlaybackScreen(story);
             document.querySelector('[data-screen="playing"]').classList.remove('hidden');
             playAudio(story);
             break;
         case STATES.THANKYOU:
+            fadeLEDToIdle();
             document.querySelector('[data-screen="thankyou"]').classList.remove('hidden');
             setTimeout(() => transitionTo(STATES.IDLE), 4000);
             break;
@@ -164,6 +169,70 @@ audioElement.addEventListener('play', () => {
     console.log('Audio play event fired');
 });
 
+// LED control functions
+async function setLEDColor(color, brightness = 1.0) {
+    try {
+        await fetch('/api/system/led', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ color, brightness })
+        });
+    } catch (err) {
+        console.error('LED control failed:', err);
+    }
+}
+
+async function turnOffLED() {
+    try {
+        await fetch('/api/system/led/off', { method: 'POST' });
+    } catch (err) {
+        console.error('LED off failed:', err);
+    }
+}
+
+function startLEDPulse(color) {
+    // Start with full brightness
+    setLEDColor(color, 1.0);
+
+    // Pulse between 0.3 and 1.0 brightness
+    let brightness = 1.0;
+    let direction = -1;
+
+    ledPulseInterval = setInterval(() => {
+        brightness += direction * 0.1;
+        if (brightness <= 0.3) {
+            brightness = 0.3;
+            direction = 1;
+        } else if (brightness >= 1.0) {
+            brightness = 1.0;
+            direction = -1;
+        }
+        setLEDColor(color, brightness);
+    }, 200); // Update every 200ms for smooth pulse
+}
+
+function stopLEDPulse() {
+    if (ledPulseInterval) {
+        clearInterval(ledPulseInterval);
+        ledPulseInterval = null;
+    }
+}
+
+function fadeLEDToIdle() {
+    // Fade from current color to off over 2 seconds
+    stopLEDPulse();
+    let brightness = 1.0;
+    const fadeInterval = setInterval(() => {
+        brightness -= 0.1;
+        if (brightness <= 0) {
+            clearInterval(fadeInterval);
+            turnOffLED();
+        } else {
+            setLEDColor(currentStory?.led_color || '#FFFFFF', brightness);
+        }
+    }, 200);
+}
+
 // NFC listener
 function startNFCListener() {
     nfcEventSource = new EventSource('/api/nfc/read');
@@ -225,4 +294,10 @@ document.addEventListener('DOMContentLoaded', () => {
             unlockAudio();
         }, { once: true });
     });
+});
+
+// Clean up on page unload
+window.addEventListener('beforeunload', () => {
+    stopLEDPulse();
+    turnOffLED();
 });
