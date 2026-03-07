@@ -82,3 +82,8 @@ if stories_static_dir.exists():
 children_static_dir = Path("static/children")
 if children_static_dir.exists():
     app.mount("/children", StaticFiles(directory=str(children_static_dir), html=True), name="children")
+
+# Mount admin panel (html=True enables index.html serving)
+admin_static_dir = Path("static/admin")
+if admin_static_dir.exists():
+    app.mount("/admin", StaticFiles(directory=str(admin_static_dir), html=True), name="admin")
