@@ -1,11 +1,13 @@
 """StoryBot FastAPI application."""
 
 from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
 
 from app.config import ConfigManager
-from app.services.hardware_manager import HardwareManager
+from app.routers.nfc import router as nfc_router
 from app.routers.system import router as system_router
+from app.services.hardware_manager import HardwareManager
 
 
 @asynccontextmanager
@@ -51,3 +53,4 @@ async def root() -> dict:
 
 # Include routers
 app.include_router(system_router, prefix="/api/system", tags=["system"])
+app.include_router(nfc_router)

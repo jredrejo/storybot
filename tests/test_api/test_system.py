@@ -1,4 +1,5 @@
 """Tests for system API endpoints."""
+
 import pytest
 from fastapi.testclient import TestClient
 
@@ -32,6 +33,19 @@ class TestSystemEndpoints:
         assert "version" in data
         assert data["version"] == "0.1.0"
 
+        # Verify all 4 services are present
+        hardware = data["hardware"]
+        assert "tts" in hardware
+        assert "nfc" in hardware
+        assert "led" in hardware
+        assert "audio" in hardware
+
+        # Verify each service has is_mock flag
+        for service_name, service_state in hardware.items():
+            assert "is_mock" in service_state
+            assert "status" in service_state
+            assert service_state["name"] == service_name
+
     def test_system_rescan_triggers_detection(self, client):
         """POST /api/system/rescan returns updated status."""
         response = client.post("/api/system/rescan")
@@ -40,3 +54,10 @@ class TestSystemEndpoints:
         assert "hardware" in data
         assert "uptime_seconds" in data
         assert "version" in data
+
+        # Verify all 4 services after rescan
+        hardware = data["hardware"]
+        assert "tts" in hardware
+        assert "nfc" in hardware
+        assert "led" in hardware
+        assert "audio" in hardware

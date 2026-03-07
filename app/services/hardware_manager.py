@@ -1,10 +1,9 @@
 """Hardware service manager."""
 
 import time
-from typing import Dict
 
-from app.services.base import HardwareService
 from app.models.system import HardwareState, SystemStatus
+from app.services.base import HardwareService
 
 
 class HardwareManager:
@@ -12,7 +11,7 @@ class HardwareManager:
 
     def __init__(self) -> None:
         """Initialize hardware manager."""
-        self._services: Dict[str, HardwareService] = {}
+        self._services: dict[str, HardwareService] = {}
         self._start_time = time.time()
         self._version = "0.1.0"
 
@@ -54,13 +53,35 @@ class HardwareManager:
         return status.dict()
 
     async def detect_hardware(self) -> None:
-        """Detect available hardware.
+        """Detect available hardware and register services.
 
-        This is a stub for now - individual hardware detection
-        will be implemented in subsequent plans.
+        Probes each service type and registers real or mock implementation
+        based on hardware availability.
         """
-        # Stub: Hardware detection will be implemented in Plan 02
-        pass
+        from app.services.audio_player import create_audio_player
+        from app.services.led_controller import create_led_service
+        from app.services.nfc_handler import create_nfc_service
+        from app.services.tts_engine import TTSEngine
+
+        # TTS: Always real, load model at startup (eager load)
+        tts_engine = TTSEngine()
+        await tts_engine.initialize()
+        self.register_service("tts", tts_engine)
+
+        # NFC: Try real, fall back to mock
+        nfc_service = create_nfc_service()
+        await nfc_service.initialize()
+        self.register_service("nfc", nfc_service)
+
+        # LED: Mock for now (hardware TBD)
+        led_service = create_led_service()
+        await led_service.initialize()
+        self.register_service("led", led_service)
+
+        # Audio: Try real, fall back to mock
+        audio_service = create_audio_player()
+        await audio_service.initialize()
+        self.register_service("audio", audio_service)
 
     async def rescan(self) -> dict:
         """Rescan for hardware changes.
