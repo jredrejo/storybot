@@ -219,3 +219,110 @@ class TestDeleteStory:
 
         assert response.status_code == 404
         assert "not found" in response.json()["detail"].lower()
+
+
+class TestNFCAssignment:
+    """Test NFC assignment endpoints."""
+
+    def test_post_nfc_to_story_assigns_card(self, client: TestClient):
+        """Test POST /api/stories/{id}/nfc assigns NFC card to story."""
+        # First create a story
+        files = {
+            "audio": ("audio.mp3", BytesIO(b"fake audio"), "audio/mpeg")
+        }
+        data = {
+            "title": "Test Story",
+            "emoji": "📚",
+            "led_color": "#FF5733",
+        }
+        create_response = client.post("/api/stories", files=files, data=data)
+        story_id = create_response.json()["id"]
+
+        # Assign NFC card
+        nfc_data = {"nfc_uid": "04:A3:5B:C2:D4:30"}
+        response = client.post(f"/api/stories/{story_id}/nfc", json=nfc_data)
+
+        assert response.status_code == 200
+        story = response.json()
+        assert story["id"] == story_id
+        assert story["nfc_uid"] == "04:A3:5B:C2:D4:30"
+
+    def test_post_nfc_to_invalid_story_returns_404(self, client: TestClient):
+        """Test POST /api/stories/{id}/nfc with invalid story_id returns 404."""
+        nfc_data = {"nfc_uid": "04:A3:5B:C2:D4:30"}
+        response = client.post("/api/stories/non-existent-id/nfc", json=nfc_data)
+
+        assert response.status_code == 404
+        assert "not found" in response.json()["detail"].lower()
+
+    def test_get_story_by_nfc_returns_story(self, client: TestClient):
+        """Test GET /api/stories/nfc/{uid} returns Story for valid mapping."""
+        # First create a story and assign NFC
+        files = {
+            "audio": ("audio.mp3", BytesIO(b"fake audio"), "audio/mpeg")
+        }
+        data = {
+            "title": "Test Story",
+            "emoji": "📚",
+            "led_color": "#FF5733",
+        }
+        create_response = client.post("/api/stories", files=files, data=data)
+        story_id = create_response.json()["id"]
+
+        nfc_uid = "04:A3:5B:C2:D4:30"
+        nfc_data = {"nfc_uid": nfc_uid}
+        client.post(f"/api/stories/{story_id}/nfc", json=nfc_data)
+
+        # Get story by NFC
+        response = client.get(f"/api/stories/nfc/{nfc_uid}")
+
+        assert response.status_code == 200
+        story = response.json()
+        assert story["id"] == story_id
+        assert story["title"] == "Test Story"
+        assert story["nfc_uid"] == nfc_uid
+
+    def test_get_story_by_unknown_nfc_returns_404(self, client: TestClient):
+        """Test GET /api/stories/nfc/{uid} with unknown UID returns 404."""
+        response = client.get("/api/stories/nfc/04:AA:BB:CC:DD:EE")
+
+        assert response.status_code == 404
+        assert "not found" in response.json()["detail"].lower() or "no story" in response.json()["detail"].lower()
+
+    def test_assigning_same_nfc_to_different_story_updates_mapping(self, client: TestClient):
+        """Test assigning same NFC to different story updates mapping (1:1)."""
+        # Create two stories
+        files = {
+            "audio": ("audio.mp3", BytesIO(b"fake audio"), "audio/mpeg")
+        }
+        data1 = {
+            "title": "Story 1",
+            "emoji": "📚",
+            "led_color": "#FF5733",
+        }
+        data2 = {
+            "title": "Story 2",
+            "emoji": "🎮",
+            "led_color": "#00FF00",
+        }
+
+        response1 = client.post("/api/stories", files=files, data=data1)
+        story1_id = response1.json()["id"]
+
+        response2 = client.post("/api/stories", files=files, data=data2)
+        story2_id = response2.json()["id"]
+
+        # Assign NFC to first story
+        nfc_uid = "04:A3:5B:C2:D4:30"
+        nfc_data = {"nfc_uid": nfc_uid}
+        client.post(f"/api/stories/{story1_id}/nfc", json=nfc_data)
+
+        # Reassign NFC to second story
+        client.post(f"/api/stories/{story2_id}/nfc", json=nfc_data)
+
+        # Verify NFC now points to second story
+        response = client.get(f"/api/stories/nfc/{nfc_uid}")
+        assert response.status_code == 200
+        story = response.json()
+        assert story["id"] == story2_id
+        assert story["title"] == "Story 2"
