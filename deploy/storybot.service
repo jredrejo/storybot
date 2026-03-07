@@ -1,0 +1,16 @@
+[Unit]
+Description=StoryBot FastAPI Server
+After=network.target
+
+[Service]
+Type=simple
+User=storybot
+Group=storybot
+WorkingDirectory=/opt/storybot
+Environment="PATH=/opt/storybot/.venv/bin"
+ExecStart=/opt/storybot/.venv/bin/uvicorn app.main:app --host 0.0.0.0 --port 8000
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

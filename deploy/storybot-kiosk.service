@@ -1,0 +1,17 @@
+[Unit]
+Description=StoryBot Chromium Kiosk
+After=graphical.target storybot.service
+Wants=storybot.service
+
+[Service]
+Type=simple
+User=storybot
+Environment="DISPLAY=:0"
+Environment="XAUTHORITY=/home/storybot/.Xauthority"
+ExecStartPre=/bin/sleep 5
+ExecStart=/usr/bin/chromium-browser --noerrdialogs --disable-infobars --disable-session-crashed-bubble --disable-translate --no-first-run --start-fullscreen --kiosk http://localhost:8000
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=graphical.target
