@@ -18,18 +18,69 @@ body {
     max-width: 100%;
 }
 
-/* Header */
+/* Header - updated with flex layout for status icons */
 header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     background-color: var(--color-primary);
-    color: white;
+    color: var(--color-text-light, white);
     padding: 1rem;
     margin: -1rem -1rem 1rem -1rem;
-    box-shadow: var(--shadow-sm);
+    box-shadow: var(--shadow-md);
 }
 
 header h1 {
     margin: 0;
     font-size: 1.5rem;
+}
+
+/* Status icons */
+.status-icons {
+    display: flex;
+    gap: var(--space-sm);
+}
+
+.status-icon {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    border-radius: var(--radius-pill);
+    background: rgba(255, 255, 255, 0.2);
+    color: white;
+    transition: background var(--duration-fast), color var(--duration-fast);
+}
+
+.status-icon svg {
+    width: 18px;
+    height: 18px;
+}
+
+/* Status states */
+.status-icon.connected {
+    background: rgba(16, 185, 129, 0.3);  /* --color-success with alpha */
+    color: #10b981;
+}
+
+.status-icon.disconnected {
+    background: rgba(239, 68, 68, 0.3);  /* --color-danger with alpha */
+    color: #ef4444;
+}
+
+.status-icon.checking {
+    animation: pulse-status 1.5s ease-in-out infinite;
+}
+
+@keyframes pulse-status {
+    0%, 100% { opacity: 0.5; }
+    50% { opacity: 1; }
+}
+
+/* Mock indicator (optional - shows when using simulated hardware) */
+.status-icon.mock {
+    border: 2px dashed rgba(255, 255, 255, 0.5);
 }
 
 /* Sections */
