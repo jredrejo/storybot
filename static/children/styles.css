@@ -39,19 +39,20 @@ html, body {
 
 /* Story grid */
 .story-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 20px;
-    padding: 20px;
-    justify-items: center;
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
     align-content: center;
-    height: 100%;
+    gap: var(--space-lg);
+    padding: var(--space-xl);
+    min-height: 100%;
 }
 
 .story-card {
-    width: 120px;
-    height: 120px;
-    border-radius: var(--radius-lg);
+    /* Base sizing */
+    width: 130px;
+    height: 130px;
+    border-radius: var(--radius-xl);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -59,10 +60,34 @@ html, body {
     cursor: pointer;
     transition: transform var(--duration-fast) var(--ease-bounce);
     box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+
+    /* Bouncy entrance animation */
+    animation: card-bounce-in var(--duration-slow) var(--ease-bounce) backwards;
+    animation-delay: calc(var(--card-index, 0) * 60ms);
 }
 
+/* Scattered effect - varied rotations */
+.story-card:nth-child(4n+1) { transform: rotate(-4deg); }
+.story-card:nth-child(4n+2) { transform: rotate(3deg); }
+.story-card:nth-child(4n+3) { transform: rotate(-2deg); }
+.story-card:nth-child(4n)   { transform: rotate(5deg); }
+
+/* Varied sizes */
+.story-card:nth-child(3n+1) { width: 140px; height: 140px; }
+.story-card:nth-child(3n+2) { width: 120px; height: 120px; }
+.story-card:nth-child(3n)   { width: 135px; height: 135px; }
+
+/* Organic vertical offsets */
+.story-card:nth-child(5n+1) { margin-top: 16px; }
+.story-card:nth-child(5n+3) { margin-top: -10px; }
+.story-card:nth-child(5n+4) { margin-top: 8px; }
+
 .story-card:active {
-    transform: scale(0.95);
+    box-shadow:
+        0 0 0 4px rgba(249, 115, 22, 0.3),
+        0 0 20px 8px rgba(249, 115, 22, 0.2);
+    transform: scale(0.97);
+    transition: box-shadow var(--duration-fast), transform var(--duration-fast);
 }
 
 /* Playback screen */
@@ -227,5 +252,22 @@ html, body {
     }
     50% {
         transform: translateY(-20px);
+    }
+}
+
+@keyframes card-bounce-in {
+    0% {
+        opacity: 0;
+        transform: scale(0.3) rotate(-10deg);
+    }
+    50% {
+        transform: scale(1.1) rotate(2deg);
+    }
+    70% {
+        transform: scale(0.95) rotate(-1deg);
+    }
+    100% {
+        opacity: 1;
+        /* Final rotation comes from nth-child rules */
     }
 }
