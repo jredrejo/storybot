@@ -1,3 +1,5 @@
+@import url('/shared/theme.css');
+
 /* Base styles */
 * {
     box-sizing: border-box;
@@ -7,7 +9,7 @@ body {
     font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Oxygen, Ubuntu, Cantarell, "Helvetica Neue", sans-serif;
     margin: 0;
     padding: 0;
-    background-color: #f5f5f5;
+    background-color: var(--color-background);
     line-height: 1.5;
 }
 
@@ -18,11 +20,11 @@ body {
 
 /* Header */
 header {
-    background-color: #007bff;
+    background-color: var(--color-primary);
     color: white;
     padding: 1rem;
     margin: -1rem -1rem 1rem -1rem;
-    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    box-shadow: var(--shadow-sm);
 }
 
 header h1 {
@@ -43,7 +45,7 @@ section h2 {
     margin-top: 0;
     margin-bottom: 1rem;
     font-size: 1.25rem;
-    color: #333;
+    color: var(--color-text);
 }
 
 /* Form styles */
@@ -55,7 +57,7 @@ label {
     display: block;
     margin-bottom: 0.5rem;
     font-weight: 500;
-    color: #555;
+    color: var(--color-text);
 }
 
 input[type="text"],
@@ -64,13 +66,13 @@ input[type="file"] {
     padding: 0.75rem;
     font-size: 16px; /* Prevents iOS zoom */
     border: 1px solid #ddd;
-    border-radius: 4px;
-    transition: border-color 0.2s;
+    border-radius: var(--radius-sm);
+    transition: border-color var(--duration-fast) var(--ease-out);
 }
 
 input[type="text"]:focus {
     outline: none;
-    border-color: #007bff;
+    border-color: var(--color-primary);
 }
 
 input[type="color"] {
@@ -79,7 +81,7 @@ input[type="color"] {
     border: none;
     padding: 0;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
 }
 
 /* Buttons */
@@ -90,23 +92,23 @@ input[type="color"] {
     font-weight: 500;
     text-align: center;
     border: none;
-    border-radius: 4px;
+    border-radius: var(--radius-sm);
     cursor: pointer;
-    transition: background-color 0.2s;
+    transition: background-color var(--duration-fast) var(--ease-out);
     width: 100%;
 }
 
 .btn-primary {
-    background-color: #007bff;
+    background-color: var(--color-primary);
     color: white;
 }
 
 .btn-primary:hover {
-    background-color: #0056b3;
+    opacity: 0.85;
 }
 
 .btn-danger {
-    background-color: #dc3545;
+    background-color: var(--color-danger);
     color: white;
     padding: 0.5rem 1rem;
     font-size: 14px;
@@ -114,11 +116,11 @@ input[type="color"] {
 }
 
 .btn-danger:hover {
-    background-color: #c82333;
+    opacity: 0.85;
 }
 
 .btn-warning {
-    background-color: #ffc107;
+    background-color: var(--color-warning);
     color: #333;
     padding: 0.5rem 1rem;
     font-size: 14px;
@@ -126,11 +128,11 @@ input[type="color"] {
 }
 
 .btn-warning:hover {
-    background-color: #e0a800;
+    opacity: 0.85;
 }
 
 .btn-success {
-    background-color: #28a745;
+    background-color: var(--color-success);
     color: white;
     padding: 0.5rem 1rem;
     font-size: 14px;
@@ -138,7 +140,7 @@ input[type="color"] {
 }
 
 .btn-success:hover {
-    background-color: #218838;
+    opacity: 0.85;
 }
 
 .btn:disabled {
@@ -165,7 +167,7 @@ input[type="color"] {
     align-items: center;
     padding: 1rem;
     border: 1px solid #ddd;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     background-color: #fff;
     gap: 1rem;
 }
@@ -184,7 +186,7 @@ input[type="color"] {
     margin: 0;
     font-size: 1.1rem;
     font-weight: 600;
-    color: #333;
+    color: var(--color-text);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -197,7 +199,7 @@ input[type="color"] {
 }
 
 .story-nfc-status.assigned {
-    color: #28a745;
+    color: var(--color-success);
 }
 
 .story-actions {
@@ -214,12 +216,12 @@ input[type="color"] {
     left: 50%;
     transform: translateX(-50%);
     padding: 1rem 1.5rem;
-    border-radius: 8px;
+    border-radius: var(--radius-md);
     font-weight: 500;
     text-align: center;
     max-width: 90%;
     z-index: 1000;
-    animation: slideUp 0.3s ease-out;
+    animation: slideUp var(--duration-normal) var(--ease-out);
 }
 
 .status-message.hidden {
